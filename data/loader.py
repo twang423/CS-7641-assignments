@@ -140,17 +140,23 @@ class DataLoader(ABC):
                                                                            random_state=random_state,
                                                                            stratify=self.classes)
         pipe = Pipeline([('Scale', preprocessing.StandardScaler())])
-        train_x = pipe.fit_transform(ds_train_x, ds_train_y)
+        # train_x = pipe.fit_transform(ds_train_x, ds_train_y)
+        train_x = ds_train_x
         train_y = np.atleast_2d(ds_train_y).T
-        test_x = pipe.transform(ds_test_x)
+        # test_x = pipe.transform(ds_test_x)
+        test_x = ds_test_x
         test_y = np.atleast_2d(ds_test_y).T
 
         train_x, validate_x, train_y, validate_y = ms.train_test_split(train_x, train_y,
                                                                        test_size=test_size, random_state=random_state,
                                                                        stratify=train_y)
-        test_y = pd.DataFrame(np.where(test_y == 0, -1, 1))
-        train_y = pd.DataFrame(np.where(train_y == 0, -1, 1))
-        validate_y = pd.DataFrame(np.where(validate_y == 0, -1, 1))
+        # test_y = pd.DataFrame(np.where(test_y == 0, -1, 1))
+        # train_y = pd.DataFrame(np.where(train_y == 0, -1, 1))
+        # validate_y = pd.DataFrame(np.where(validate_y == 0, -1, 1))
+        test_y = pd.DataFrame(test_y)
+        train_y = pd.DataFrame(train_y)
+        validate_y = pd.DataFrame(validate_y)
+
 
         tst = pd.concat([pd.DataFrame(test_x), test_y], axis=1)
         trg = pd.concat([pd.DataFrame(train_x), train_y], axis=1)
@@ -322,6 +328,25 @@ class HTRU2Data(DataLoader):
 
     def class_column_name(self):
         return '8'
+
+    def _preprocess_data(self):
+        pass
+
+    def pre_training_adjustment(self, train_features, train_classes):
+        return train_features, train_classes
+
+class PhishingData(DataLoader):
+    def __init__(self, path='data/Phishing_Dataset.csv', verbose=False, seed=1):
+        super().__init__(path, verbose, seed)
+
+    def _load_data(self):
+        self._data = pd.read_csv(self._path, header=1)
+
+    def data_name(self):
+        return 'PhishingData'
+
+    def class_column_name(self):
+        return '30'
 
     def _preprocess_data(self):
         pass
